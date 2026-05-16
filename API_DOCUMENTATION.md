@@ -46,7 +46,7 @@ Authenticates the user and returns a Sanctum Bearer token.
 | Field        | Value           |
 |--------------|-----------------|
 | **Method**   | `POST`          |
-| **Endpoint** | `/login`        |
+| **Endpoint** | `/auth/login`   |
 | **Auth**     | Not Required    |
 
 **Request Body:**
@@ -104,7 +104,7 @@ Revokes the current device's Bearer token from the server.
 | Field        | Value        |
 |--------------|--------------|
 | **Method**   | `POST`       |
-| **Endpoint** | `/logout`    |
+| **Endpoint** | `/auth/logout`|
 | **Auth**     | Required     |
 
 **Request Body:** *(None)*
@@ -522,7 +522,7 @@ GET /payroll/generate?staff_id=1&month=2026-05
 
 **Login:**
 ```bash
-curl -X POST http://127.0.0.1:8000/api/login \
+curl -X POST http://127.0.0.1:8000/api/auth/login \
   -H "Content-Type: application/json" \
   -H "Accept: application/json" \
   -d '{"email":"admin@presencex.com","password":"password123","device_name":"curl-test"}'

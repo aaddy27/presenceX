@@ -13,15 +13,18 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-// Public routes
-Route::post('/login', [AuthController::class, 'login']);
+// Auth Routes Group
+Route::prefix('auth')->group(function () {
+    Route::post('/login', [AuthController::class, 'login']);
+    
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/logout', [AuthController::class, 'logout']);
+    });
+});
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
     
-    // Auth
-    Route::post('/logout', [AuthController::class, 'logout']);
-
     // Staff Management
     Route::get('/staff/sync-down', [StaffController::class, 'syncDown']);
     Route::post('/staff/register', [StaffController::class, 'register']);
