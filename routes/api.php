@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\HolidayController;
 use App\Http\Controllers\Api\PayrollController;
 use App\Http\Controllers\Api\StaffController;
+use App\Http\Controllers\Api\ShiftController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -31,6 +32,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Attendance
     Route::post('/attendance/sync-up', [AttendanceSyncController::class, 'syncUp']);
+    Route::post('/attendance/punch', [AttendanceSyncController::class, 'punch']);
 
     // Payroll
     Route::get('/payroll/generate', [PayrollController::class, 'generate']);
@@ -38,4 +40,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // Holidays
     Route::get('/holidays', [HolidayController::class, 'index']);
     Route::post('/holidays', [HolidayController::class, 'store']);
+
+    // Shifts
+    Route::get('/shifts', [ShiftController::class, 'index']);
+    Route::post('/shifts', [ShiftController::class, 'store']);
 });

@@ -36,5 +36,22 @@ class AttendanceSyncController extends Controller
             'processed_count' => $result['processed'],
             'errors' => $result['errors']
         ]);
+    public function punch(Request $request)
+    {
+        $validated = $request->validate([
+            'staff_id' => 'required',
+            'type' => 'required|in:in,out',
+            'timestamp' => 'required|date',
+        ]);
+
+        // Logic to record single punch
+        // For now, we can use the service or direct model
+        \App\Models\AttendanceLog::create([
+            'staff_id' => $validated['staff_id'],
+            'type' => $validated['type'],
+            'timestamp' => $validated['timestamp'],
+        ]);
+
+        return response()->json(['message' => 'Punch recorded successfully']);
     }
 }
