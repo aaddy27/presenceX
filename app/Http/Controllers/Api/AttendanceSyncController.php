@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\AttendanceLog;
+use App\Models\StaffDetail;
 use App\Services\AttendanceService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class AttendanceSyncController extends Controller
@@ -36,22 +39,37 @@ class AttendanceSyncController extends Controller
             'processed_count' => $result['processed'],
             'errors' => $result['errors']
         ]);
+    }
+
+    /**
+     * Record a single punch (In or Out).
+     */
     public function punch(Request $request)
     {
         $validated = $request->validate([
-            'staff_id' => 'required',
+            'staff_id' => 'required|exists:staff_details,id',
             'type' => 'required|in:in,out',
-            'timestamp' => 'required|date',
+            'timestamp' => 'nullable|date',
         ]);
 
-        // Logic to record single punch
-        // For now, we can use the service or direct model
-        \App\Models\AttendanceLog::create([
-            'staff_id' => $validated['staff_id'],
-            'type' => $validated['type'],
-            'timestamp' => $validated['timestamp'],
-        ]);
+        $timestamp = isset($validated['timestamp']) ? Carbon::parse($validated['timestamp']) : now();
+        $date = $timestamp->toDateString();
+        $time = $timestamp->toTimeString();
 
-        return response()->json(['message' => 'Punch recorded successfully']);
+        $staff = StaffDetail::with('shift')->findOrFail($validated['staff_id']);
+
+        $attendance = AttendanceLog::updateOrCreate(
+            ['staff_id' => $staff->id, 'date' => $date],
+            [
+                ($validated['type'] === 'in' ? 'punch_in' : 'punch_out') => $time
+            ]
+        );
+
+        $this->attendanceService->updateAttendanceStats($attendance, $staff);
+
+        return response()->json([
+            'message' => 'Punch recorded successfully',
+            'attendance' => $attendance
+        ]);
     }
 }

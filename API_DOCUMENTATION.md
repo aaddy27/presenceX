@@ -16,9 +16,12 @@
 - [3. Sync Down — Fetch Staff](#3-sync-down--fetch-active-staff)
 - [4. Register Staff](#4-register-new-staff)
 - [5. Attendance Sync Up](#5-attendance-sync-up)
-- [6. Get Holidays](#6-get-all-holidays)
-- [7. Add Holiday](#7-add-holiday)
-- [8. Generate Payroll](#8-generate-payroll)
+- [6. Single Punch (In/Out)](#6-single-punch-inout)
+- [7. Get Holidays](#7-get-all-holidays)
+- [8. Add Holiday](#8-add-holiday)
+- [9. Generate Payroll](#9-generate-payroll)
+- [10. Get Shifts](#10-get-shifts)
+- [11. Add Shift](#11-add-shift)
 - [Error Reference](#-error-reference)
 - [Default Credentials](#-default-credentials)
 - [Quick cURL Tests](#-quick-curl-tests)
@@ -323,7 +326,49 @@ Sends an array of locally cached attendance punch logs to the server. The backen
 
 ---
 
-## 6. Get All Holidays
+## 6. Single Punch (In/Out)
+
+Records a single "Punch In" or "Punch Out" event for an employee.
+
+| Field        | Value                 |
+|--------------|-----------------------|
+| **Method**   | `POST`                |
+| **Endpoint** | `/attendance/punch`   |
+| **Auth**     | Required              |
+
+**Request Body:**
+```json
+{
+  "staff_id": 1,
+  "type": "in",
+  "timestamp": "2026-05-16 09:15:00"
+}
+```
+
+| Field       | Type     | Required | Description                                  |
+|-------------|----------|----------|----------------------------------------------|
+| `staff_id`  | `int`    | Yes      | Internal ID of the employee                  |
+| `type`      | `string` | Yes      | Must be `in` or `out`                        |
+| `timestamp` | `date`   | No       | Format: `YYYY-MM-DD HH:MM:SS`. Defaults to now|
+
+**Success Response — `200 OK`:**
+```json
+{
+  "message": "Punch recorded successfully",
+  "attendance": {
+    "id": 15,
+    "staff_id": 1,
+    "date": "2026-05-16",
+    "punch_in": "09:15:00",
+    "punch_out": null,
+    "status": "Present"
+  }
+}
+```
+
+---
+
+## 7. Get All Holidays
 
 Fetches all registered organizational holidays sorted by date ascending.
 
@@ -469,6 +514,53 @@ GET /payroll/generate?staff_id=1&month=2026-05
 | `deductions.half_day_penalty_days` | `float`  | Each half day = 0.5 day deduction                                   |
 | `payable_days`                     | `float`  | `present + holidays - late_deductions - half_day_deductions`        |
 | `final_payable_salary`             | `float`  | `payable_days x per_day_salary` — the net disbursement amount       |
+
+---
+
+## 10. Get Shifts
+
+Fetches all available shifts.
+
+| Field        | Value       |
+|--------------|-------------|
+| **Method**   | `GET`       |
+| **Endpoint** | `/shifts`   |
+| **Auth**     | Required    |
+
+**Success Response — `200 OK`:**
+```json
+[
+  {
+    "id": 1,
+    "name": "Morning Shift",
+    "start_time": "09:00:00",
+    "end_time": "17:00:00"
+  }
+]
+```
+
+---
+
+## 11. Add Shift
+
+Creates a new shift.
+
+| Field        | Value       |
+|--------------|-------------|
+| **Method**   | `POST`      |
+| **Endpoint** | `/shifts`   |
+| **Auth**     | Required    |
+
+**Request Body:**
+```json
+{
+  "name": "Night Shift",
+  "start_time": "22:00:00",
+  "end_time": "06:00:00",
+  "grace_time_minutes": 15,
+  "half_day_minutes_threshold": 240
+}
+```
 
 ---
 
